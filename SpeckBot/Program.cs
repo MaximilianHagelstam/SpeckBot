@@ -17,7 +17,7 @@ namespace SpeckBot
         public async Task MainAsync()
         {
             _client = new DiscordSocketClient();
-
+            _client.MessageReceived += CommandHandler;
             _client.Log += Log;
 
             var token = File.ReadAllText("token.txt");
@@ -31,6 +31,39 @@ namespace SpeckBot
         private Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
+            return Task.CompletedTask;
+        }
+
+        private Task CommandHandler(SocketMessage message)
+        {
+            if (!message.Content.StartsWith('!'))
+                return Task.CompletedTask;
+
+            if (message.Author.IsBot)
+                return Task.CompletedTask;
+
+            int lengthOfCommand;
+            if (message.Content.Contains(' '))
+                lengthOfCommand = message.Content.IndexOf(' ');
+            else
+                lengthOfCommand = message.Content.Length;
+
+            string command = message.Content.Substring(1, lengthOfCommand - 1).ToLower();
+
+            //Commands begin here
+            if (command.Equals("hello"))
+            {
+                message.Channel.SendMessageAsync($@"Hello {message.Author.Mention}");
+            }
+            else if (command.Equals("age"))
+            {
+                message.Channel.SendMessageAsync($@"Your account was created at {message.Author.CreatedAt.DateTime.Date}");
+            }
+            else if (command.Equals("bitcoin"))
+            {
+                message.Channel.SendMessageAsync($"The price of Bitcoin is currently {getBitcoinPrice()}€");
+            }
+
             return Task.CompletedTask;
         }
 
