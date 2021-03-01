@@ -9,33 +9,15 @@ namespace SpeckBot
 {
     class Program
     {
-        public static void Main(string[] args)
-        => new Program().MainAsync().GetAwaiter().GetResult();
-
-        private DiscordSocketClient _client;
-
-        public async Task MainAsync()
+        public static Task Log(LogMessage message)
         {
-            _client = new DiscordSocketClient();
-            _client.MessageReceived += CommandHandler;
-            _client.Log += Log;
-
-            var token = File.ReadAllText("token.txt");
-
-            await _client.LoginAsync(TokenType.Bot, token);
-            await _client.StartAsync();
-
-            await Task.Delay(-1);
-        }
-
-        private Task Log(LogMessage msg)
-        {
-            Console.WriteLine(msg.ToString());
+            Console.WriteLine(message.ToString());
             return Task.CompletedTask;
         }
 
-        private Task CommandHandler(SocketMessage message)
+        public static Task CommandHandler(SocketMessage message)
         {
+            // Filters
             if (!message.Content.StartsWith('!'))
                 return Task.CompletedTask;
 
@@ -48,9 +30,9 @@ namespace SpeckBot
             else
                 lengthOfCommand = message.Content.Length;
 
-            string command = message.Content.Substring(1, lengthOfCommand - 1).ToLower();
+            string command = message.Content[1..lengthOfCommand].ToLower();
 
-            //Commands begin here
+            // Commands
             if (command.Equals("hello"))
             {
                 message.Channel.SendMessageAsync($@"Hello {message.Author.Mention}");
@@ -61,13 +43,13 @@ namespace SpeckBot
             }
             else if (command.Equals("bitcoin"))
             {
-                message.Channel.SendMessageAsync($"The price of Bitcoin is currently {getBitcoinPrice()}€");
+                message.Channel.SendMessageAsync($"The price of Bitcoin is currently {GetBitcoinPrice()}€");
             }
 
             return Task.CompletedTask;
         }
 
-        private double getBitcoinPrice()
+        private static double GetBitcoinPrice()
         {
             string URI = String.Format(@"https://blockchain.info/tobtc?currency=EUR&value={0}", 1);
 
