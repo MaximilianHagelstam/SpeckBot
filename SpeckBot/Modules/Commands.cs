@@ -8,14 +8,14 @@ namespace SpeckBot.Modules
     public class Commands : ModuleBase<SocketCommandContext>
     {
         [Command("bitcoin")]
-        public async Task Greeting()
+        public async Task Bitcoin(string currency = "EUR")
         {
-            await ReplyAsync($"The price of Bitcoin is currently {GetBitcoinPrice()}€");
+            await ReplyAsync($"1 Bitcoin is worth {GetBitcoinPrice(currency)} {currency.ToUpper()}");
         }
 
-        private double GetBitcoinPrice()
+        private double GetBitcoinPrice(string currency)
         {
-            string URI = String.Format(@"https://blockchain.info/tobtc?currency=EUR&value={0}", 1);
+            string URI = String.Format($"https://blockchain.info/tobtc?currency={currency}&value=1");
 
             WebClient client = new WebClient
             {
