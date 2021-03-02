@@ -9,8 +9,6 @@ namespace SpeckBot.Modules
 {
     public class Commands : ModuleBase<SocketCommandContext>
     {
-        static SerialPort _serialPort;
-
         [Command("bitcoin")]
         public async Task Bitcoin(string currency = "EUR")
         {
@@ -29,18 +27,32 @@ namespace SpeckBot.Modules
             await ReplyAsync($"The winner is {rollWinner}");
         }
 
-        [Command("temp")]
-        public async Task ReadSerialData()
+        [Command("read")]
+        public async Task ReadSerialData(string serialData)
+        {
+            if (serialData == "temp" || serialData == "temperature")
+            {
+                await ReplyAsync($"The temperature in Maxims room is {GetTemperature()}");
+            }
+
+            else if (serialData == "hum" || serialData == "humidity")
+            {
+                await ReplyAsync("Humidity coming soon");
+
+            }
+        }
+
+        private string GetTemperature()
         {
             SerialPort mySerialPort = new SerialPort("COM4", 9600);
 
             mySerialPort.Open();
 
-            string data = mySerialPort.ReadLine();
-
-            await ReplyAsync($"The temperature in Maxims room is {data}");
+            string temperature = mySerialPort.ReadLine();
 
             mySerialPort.Close();
+
+            return temperature;
         }
 
         private double GetBitcoinPrice(string currency)
