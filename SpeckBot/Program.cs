@@ -1,68 +1,71 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
-using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SpeckBot
 {
     class Program
     {
-        public static Task Log(LogMessage message)
+        static void Main(string[] args) => new Program().RunBotAsync().GetAwaiter().GetResult();
+
+        private DiscordSocketClient _client;
+        private CommandService _commands;
+        private IServiceProvider _services;
+
+        public async Task RunBotAsync()
         {
-            Console.WriteLine(message.ToString());
+            _client = new DiscordSocketClient();
+            _commands = new CommandService();
+
+            _services = new ServiceCollection()
+                .AddSingleton(_client)
+                .AddSingleton(_commands)
+                .BuildServiceProvider();
+
+            string token = File.ReadAllText("token.txt");
+
+            _client.Log += ClientLog;
+
+            await RegisterCommandsAsync();
+
+            await _client.LoginAsync(TokenType.Bot, token);
+
+            await _client.StartAsync();
+
+            await Task.Delay(-1);
+
+        }
+
+        private Task ClientLog(LogMessage arg)
+        {
+            Console.WriteLine(arg);
             return Task.CompletedTask;
         }
 
-        public static Task CommandHandler(SocketMessage message)
+        public async Task RegisterCommandsAsync()
         {
-            // Filters
-            if (!message.Content.StartsWith('!'))
-                return Task.CompletedTask;
-
-            if (message.Author.IsBot)
-                return Task.CompletedTask;
-
-            int lengthOfCommand;
-            if (message.Content.Contains(' '))
-                lengthOfCommand = message.Content.IndexOf(' ');
-            else
-                lengthOfCommand = message.Content.Length;
-
-            string command = message.Content[1..lengthOfCommand].ToLower();
-
-            // Commands
-            if (command.Equals("hello"))
-            {
-                message.Channel.SendMessageAsync($@"Hello {message.Author.Mention}");
-            }
-            else if (command.Equals("age"))
-            {
-                message.Channel.SendMessageAsync($@"Your account was created at {message.Author.CreatedAt.DateTime.Date}");
-            }
-            else if (command.Equals("bitcoin"))
-            {
-                message.Channel.SendMessageAsync($"The price of Bitcoin is currently {GetBitcoinPrice()}€");
-            }
-
-            return Task.CompletedTask;
+            _client.MessageReceived += HandleCommandAsync;
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
 
-        private static double GetBitcoinPrice()
+        private async Task HandleCommandAsync(SocketMessage arg)
         {
-            string URI = String.Format(@"https://blockchain.info/tobtc?currency=EUR&value={0}", 1);
+            var message = arg as SocketUserMessage;
+            var context = new SocketCommandContext(_client, message);
+            if (message.Author.IsBot) return;
 
-            WebClient client = new WebClient
+            int argPos = 0;
+            if (message.HasStringPrefix("!", ref argPos))
             {
-                UseDefaultCredentials = true
-            };
-
-            string data = client.DownloadString(URI);
-
-            double result = 1 / Convert.ToDouble(data.Replace('.', ','));
-
-            return result;
+                var result = await _commands.ExecuteAsync(context, argPos, _services);
+                if (!result.IsSuccess) Console.WriteLine(result.ErrorReason);
+                if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);
+            }
         }
     }
 }
