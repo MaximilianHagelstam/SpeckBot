@@ -4,17 +4,17 @@ namespace SpeckBot.Modules
 {
     class ArduinoData
     {
-        public string GetTemperature()
+        public string GetSmoke()
         {
-            SerialPort mySerialPort = new SerialPort("COM4", 9600);
+            SerialPort mySerialPort = new SerialPort("COM5", 9600);
 
             mySerialPort.Open();
 
-            string temperature = mySerialPort.ReadLine();
+            string smoke = mySerialPort.ReadLine();
 
             mySerialPort.Close();
 
-            return temperature;
+            return smoke;
         }
     }
 }

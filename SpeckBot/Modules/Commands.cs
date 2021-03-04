@@ -31,21 +31,13 @@ namespace SpeckBot.Modules
             await ReplyAsync($"The winner is {rollWinner}");
         }
 
-        [Command("read")]
-        public async Task ReadSerialData(string serialData)
+        [Command("smoke")]
+        public async Task ReadSerialData()
         {
-            if (serialData == "temp" || serialData == "temperature")
-            {
-                string temperature = arduino.GetTemperature();
 
-                await ReplyAsync($"The temperature in Maxims room is {temperature}");
-            }
+            string smoke = arduino.GetSmoke();
 
-            else if (serialData == "hum" || serialData == "humidity")
-            {
-                await ReplyAsync("Humidity coming soon");
-
-            }
+            await ReplyAsync($"Smoke: {smoke}");
         }
     }
 }
