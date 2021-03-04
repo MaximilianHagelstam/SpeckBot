@@ -1,16 +1,17 @@
-﻿using System.IO.Ports;
+﻿using System;
+using System.IO.Ports;
 
 namespace SpeckBot.Modules
 {
     class ArduinoData
     {
-        public string GetSmoke()
+        public int GetSmoke()
         {
-            SerialPort mySerialPort = new SerialPort("COM5", 9600);
+            SerialPort mySerialPort = new SerialPort("COM6", 9600);
 
             mySerialPort.Open();
 
-            string smoke = mySerialPort.ReadLine();
+            int smoke = Int32.Parse(mySerialPort.ReadLine());
 
             mySerialPort.Close();
 

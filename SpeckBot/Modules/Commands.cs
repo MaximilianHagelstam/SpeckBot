@@ -1,7 +1,4 @@
 ﻿using System;
-using System.IO.Ports;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord.Commands;
 
@@ -12,6 +9,8 @@ namespace SpeckBot.Modules
         ArduinoData arduino = new ArduinoData();
         MarketPrices price = new MarketPrices();
         Random random = new Random();
+
+        int SMOKE_THRESHOLD = 400;
 
         [Command("bitcoin")]
         public async Task Bitcoin(string currency = "EUR")
@@ -35,9 +34,14 @@ namespace SpeckBot.Modules
         public async Task ReadSerialData()
         {
 
-            string smoke = arduino.GetSmoke();
+            int smoke = arduino.GetSmoke();
 
-            await ReplyAsync($"Smoke: {smoke}");
+            if (smoke >= SMOKE_THRESHOLD)
+            {
+                await ReplyAsync($"TOO MUCH SMOKE: {smoke}ppm");
+            } else {
+                await ReplyAsync($"Smoke: {smoke}ppm");
+            }
         }
     }
 }
