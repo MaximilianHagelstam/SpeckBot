@@ -1,5 +1,4 @@
-const app = require('express')();
-const path = require('path');
+const app = require('express');
 const { exec } = require('child_process');
 
 const PORT = 3000;
