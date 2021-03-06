@@ -3,19 +3,19 @@ using System.IO.Ports;
 
 namespace SpeckBot.Modules
 {
-    class ArduinoData
+    class SerialCommunication
     {
-        public int GetSmoke()
+        public int GetSerialData()
         {
             SerialPort mySerialPort = new SerialPort("COM6", 9600);
 
             mySerialPort.Open();
 
-            int smoke = Int32.Parse(mySerialPort.ReadLine());
+            int serialData = Int32.Parse(mySerialPort.ReadLine());
 
             mySerialPort.Close();
 
-            return smoke;
+            return serialData;
         }
     }
 }

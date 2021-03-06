@@ -6,9 +6,11 @@ namespace SpeckBot.Modules
 {
     public class Commands : ModuleBase<SocketCommandContext>
     {
-        ArduinoData arduino = new ArduinoData();
-        MarketPrices price = new MarketPrices();
         Random random = new Random();
+
+        SerialCommunication serial = new SerialCommunication();
+        MarketPrices price = new MarketPrices();
+        PiCommunication pi = new PiCommunication();
 
         int SMOKE_THRESHOLD = 400;
 
@@ -31,17 +33,26 @@ namespace SpeckBot.Modules
         }
 
         [Command("smoke")]
-        public async Task ReadSerialData()
+        public async Task Smoke()
         {
 
-            int smoke = arduino.GetSmoke();
+            int smoke = serial.GetSerialData();
 
             if (smoke >= SMOKE_THRESHOLD)
             {
                 await ReplyAsync($"TOO MUCH SMOKE: {smoke}ppm");
-            } else {
+            }
+            else
+            {
                 await ReplyAsync($"Smoke: {smoke}ppm");
             }
+        }
+
+        [Command("led")]
+        public async Task Led(string state)
+        {
+            await pi.SendPostRequest(state);
+            await ReplyAsync($"LED turned {state.ToUpper()}");
         }
     }
 }
