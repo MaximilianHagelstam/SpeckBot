@@ -48,8 +48,8 @@ namespace SpeckBot.Modules
             }
         }
 
-        [Command("led")]
-        public async Task Led(string state)
+        [Command("relay")]
+        public async Task Relay(string state)
         {
             await pi.SendPostRequest(state);
             await ReplyAsync($"LED turned {state.ToUpper()}");
